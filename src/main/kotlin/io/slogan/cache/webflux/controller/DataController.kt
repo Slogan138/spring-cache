@@ -17,7 +17,7 @@ class DataController(
 ) {
 
     @GetMapping("/api/data")
-    fun get(@RequestParam key: String): Mono<String>? = Mono.create { dataService.get(key) }
+    fun get(@RequestParam key: String): Mono<String> = Mono.create { dataService.get(key) }
 
     @PostMapping("/api/data")
     fun create(@RequestBody request: Map<String, Any>): Mono<String>? = Mono.create { dataService.create(request) }

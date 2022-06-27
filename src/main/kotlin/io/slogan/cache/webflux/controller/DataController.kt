@@ -17,14 +17,14 @@ class DataController(
 ) {
 
     @GetMapping("/api/data")
-    fun get(@RequestParam key: String): Mono<String> = Mono.create { dataService.get(key) }
+    fun get(@RequestParam key: String): Mono<String> = Mono.justOrEmpty(dataService.get(key))
 
     @PostMapping("/api/data")
-    fun create(@RequestBody request: Map<String, Any>): Mono<String>? = Mono.create { dataService.create(request) }
+    fun create(@RequestBody request: Map<String, Any>): Mono<String> = Mono.justOrEmpty(dataService.create(request))
 
     @PutMapping("/api/data")
-    fun update(@RequestBody request: Map<String, Any>): Mono<String>? = Mono.create { dataService.update(request) }
+    fun update(@RequestBody request: Map<String, Any>): Mono<String> = Mono.justOrEmpty(dataService.update(request))
 
     @DeleteMapping("/api/data/{key}")
-    fun delete(@PathVariable key: String): Mono<Boolean>? = Mono.create { dataService.delete(key) }
+    fun delete(@PathVariable key: String): Mono<Boolean> = Mono.justOrEmpty(dataService.delete(key))
 }

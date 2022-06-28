@@ -20,7 +20,7 @@ class WebfluxApplicationTests {
     lateinit var dataController: DataController
 
     @Test
-    fun getCalled_thenShouldReturnNullButPrintData() {
+    fun callGetMethodByHello_thenReturnWorld() {
         val result = dataController.get("hello")
         log.debug("Data: {}", result)
         Assertions.assertEquals("world", result.block())

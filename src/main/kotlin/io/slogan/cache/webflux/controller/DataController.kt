@@ -4,9 +4,6 @@ import io.slogan.cache.webflux.service.DataService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Mono
@@ -19,12 +16,6 @@ class DataController(
     @GetMapping("/api/data")
     fun get(@RequestParam key: String): Mono<String> = Mono.justOrEmpty(dataService.get(key))
 
-    @PostMapping("/api/data")
-    fun create(@RequestBody request: Map<String, Any>): Mono<String> = Mono.justOrEmpty(dataService.create(request))
-
-    @PutMapping("/api/data")
-    fun update(@RequestBody request: Map<String, Any>): Mono<String> = Mono.justOrEmpty(dataService.update(request))
-
     @DeleteMapping("/api/data/{key}")
-    fun delete(@PathVariable key: String): Mono<Boolean> = Mono.justOrEmpty(dataService.delete(key))
+    fun deleteCache(@PathVariable key: String): Mono<Boolean> = Mono.justOrEmpty(dataService.deleteCache(key))
 }

@@ -1,6 +1,8 @@
 package io.slogan.cache.webflux
 
 import io.slogan.cache.webflux.controller.DataController
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Test
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,18 +19,10 @@ class WebfluxApplicationTests {
     @Autowired
     lateinit var dataController: DataController
 
-    /*
     @Test
     fun getCalled_thenShouldReturnNullButPrintData() {
-        val mono = dataController.get("key")
-        var result: String
-
-        mono.subscribe {
-            result = it
-            print(it)
-        }
-
-        Assertions.assertNull(result)
+        val result = dataController.get("hello")
+        log.debug("Data: {}", result)
+        Assertions.assertEquals("world", result.block())
     }
-    */
 }

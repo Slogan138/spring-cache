@@ -1,0 +1,7 @@
+logging:
+  level:
+    root: INFO
+    io:
+      slogan:
+        cache:
+          webflux: DEBUG

@@ -19,7 +19,11 @@ class DataController(
     fun get(@RequestParam key: String): Mono<String> = Mono.justOrEmpty(dataService.get(key))
 
     @PostMapping("/api/data")
-    fun create(@RequestBody request: Map<String, String>): Mono<String> = Mono.justOrEmpty("")
+    fun create(@RequestBody request: Map<String, String>): Mono<List<String>> {
+        val response = arrayListOf<String>()
+        request.forEach { (k, v) -> dataService.create(k, v)?.let { response.add(it) } }
+        return Mono.justOrEmpty(response)
+    }
 
     @DeleteMapping("/api/data/{key}")
     fun deleteCache(@PathVariable key: String): Mono<Boolean> = Mono.justOrEmpty(dataService.deleteCache(key))

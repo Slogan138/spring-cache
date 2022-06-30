@@ -25,4 +25,11 @@ class WebfluxApplicationTests {
         log.debug("Data: {}", result)
         Assertions.assertEquals("world", result.block())
     }
+
+    @Test
+    fun callCreateMethod_thenReturnSendData() {
+        val input = hashMapOf("hello" to "world")
+        val result = dataController.create(input)
+        Assertions.assertEquals(arrayListOf("hello:world\n"), result.block())
+    }
 }

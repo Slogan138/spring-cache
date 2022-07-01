@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "data.store.path",
+      "type": "java.lang.String",
+      "description": "Data Store File Path."
+    }
+  ]
+}

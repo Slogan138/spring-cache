@@ -5,3 +5,7 @@ logging:
       slogan:
         cache:
           webflux: DEBUG
+
+data:
+  store:
+    path: /Users/jinwoo/data.txt

@@ -1,5 +1,6 @@
 package io.slogan.cache.webflux.service
 
+import io.slogan.cache.webflux.exception.DuplicateKeyException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -39,9 +40,11 @@ class DataServiceImpl : DataService {
         return searchValue[0].split(":")[1]
     }
 
-    // TODO: key 존재 시 데이터 입력 못하게 수정
     @CacheEvict(cacheNames = ["file"], key = "#key")
     override fun create(key: String, value: String): String? {
+        if (get(key) != null) {
+            throw DuplicateKeyException("Input Key was already exist!!")
+        }
         val inputData = "$key:$value\n"
         log.debug("Input Data: {}", inputData)
         try {

@@ -51,9 +51,13 @@ class WebfluxApplicationTests {
         val value = "test input"
         val input = hashMapOf(key to value)
         Assertions.assertThrowsExactly(DuplicateKeyException::class.java) {
-            log.debug(
-                dataController.create(input).block().toString()
-            )
+            log.debug(dataController.create(input).block().toString())
         }
+    }
+
+    // TODO: Cache Flush 여부 검증 가능하도록 수정
+    @Test
+    fun callFlushCacheMethod_thenReturnTrue() {
+        Assertions.assertTrue { dataController.deleteCache("hello").blockOptional().get() }
     }
 }

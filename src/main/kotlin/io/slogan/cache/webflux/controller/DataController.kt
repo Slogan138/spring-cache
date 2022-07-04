@@ -26,5 +26,8 @@ class DataController(
     }
 
     @DeleteMapping("/api/data/{key}")
-    fun deleteCache(@PathVariable key: String): Mono<Boolean> = Mono.justOrEmpty(dataService.deleteCache(key))
+    fun delete(@PathVariable key: String): Mono<Boolean> = Mono.justOrEmpty(dataService.delete(key))
+
+    @DeleteMapping("/api/data/flush/{key}")
+    fun deleteCache(@PathVariable key: String): Mono<Boolean> = Mono.justOrEmpty(dataService.flushCache(key))
 }

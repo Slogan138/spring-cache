@@ -6,5 +6,7 @@ interface DataService {
 
     fun create(key: String, value: String): String?
 
-    fun deleteCache(key: String): Boolean
+    fun delete(key: String): Boolean
+
+    fun flushCache(key: String): Boolean
 }

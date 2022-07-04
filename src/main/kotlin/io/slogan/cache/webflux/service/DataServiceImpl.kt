@@ -57,7 +57,19 @@ class DataServiceImpl : DataService {
     }
 
     @CacheEvict(cacheNames = ["file"], key = "#key")
-    override fun deleteCache(key: String): Boolean {
+    override fun delete(key: String): Boolean {
+        val data = arrayListOf<String>()
+        File(filePath).forEachLine {
+            if (key != it.split(":")[0]) {
+                data.add(it)
+            }
+        }
+        // TODO: data value 기반으로 파일 덮어쓰기 추가
+        return true
+    }
+
+    @CacheEvict(cacheNames = ["file"], key = "#key")
+    override fun flushCache(key: String): Boolean {
         return true
     }
 }

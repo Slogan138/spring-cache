@@ -6,6 +6,8 @@ interface DataService {
 
     fun create(key: String, value: String): String?
 
+    fun update(key: String, value: String): String?
+
     fun delete(key: String): Boolean
 
     fun flushCache(key: String): Boolean

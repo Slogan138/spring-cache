@@ -1,6 +1,7 @@
 package io.slogan.cache.webflux.service
 
 import io.slogan.cache.webflux.exception.DuplicateKeyException
+import org.apache.logging.log4j.util.Strings
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -56,15 +57,22 @@ class DataServiceImpl : DataService {
         return inputData
     }
 
+    override fun update(key: String, value: String): String? {
+        TODO("Not yet implemented")
+    }
+
     @CacheEvict(cacheNames = ["file"], key = "#key")
     override fun delete(key: String): Boolean {
         val data = arrayListOf<String>()
-        File(filePath).forEachLine {
+        val file = File(filePath)
+        file.forEachLine {
             if (key != it.split(":")[0]) {
                 data.add(it)
             }
         }
-        // TODO: data value 기반으로 파일 덮어쓰기 추가
+
+        file.delete()
+        Files.write(Paths.get(filePath), Strings.join(data, '\n').toByteArray(), StandardOpenOption.CREATE)
         return true
     }
 

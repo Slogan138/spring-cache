@@ -57,8 +57,12 @@ class DataServiceImpl : DataService {
         return inputData
     }
 
+    @CacheEvict(cacheNames = ["file"], key = "#key")
     override fun update(key: String, value: String): String? {
-        TODO("Not yet implemented")
+        if (!delete(key)) {
+            throw IOException("Something was wrong, when key update")
+        }
+        return create(key, value)
     }
 
     @CacheEvict(cacheNames = ["file"], key = "#key")
@@ -71,8 +75,8 @@ class DataServiceImpl : DataService {
             }
         }
 
-        file.delete()
         // Warning!! : Performance Issue must cause, If File has huge data.
+        file.delete()
         Files.write(Paths.get(filePath), Strings.join(data, '\n').toByteArray(), StandardOpenOption.CREATE)
         return true
     }

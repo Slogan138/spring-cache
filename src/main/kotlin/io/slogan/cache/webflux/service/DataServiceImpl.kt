@@ -1,6 +1,5 @@
 package io.slogan.cache.webflux.service
 
-import io.slogan.cache.webflux.exception.DuplicateKeyException
 import org.apache.logging.log4j.util.Strings
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -22,7 +21,7 @@ class DataServiceImpl : DataService {
     lateinit var filePath: String
 
     @Cacheable(cacheNames = ["file"], key = "#key")
-    override fun get(key: String): String? {
+    override fun get(key: String): String {
         log.info("Found Key: {}", key)
         val searchValue = arrayListOf<String>()
         File(filePath).forEachLine { line ->
@@ -34,7 +33,7 @@ class DataServiceImpl : DataService {
 
         if (searchValue.size != 1) {
             log.warn("Illegal Input: {}", key)
-            return null
+            throw IllegalArgumentException("Illegal Input!!")
         }
 
         log.debug("Found Value: {}", searchValue[0].split(":")[1])
@@ -42,23 +41,21 @@ class DataServiceImpl : DataService {
     }
 
     @CacheEvict(cacheNames = ["file"], key = "#key")
-    override fun create(key: String, value: String): String? {
-        if (get(key) != null) {
-            throw DuplicateKeyException("Input Key was already exist!!")
-        }
+    override fun create(key: String, value: String): String {
+        get(key) // Check duplicate key
         val inputData = "$key:$value\n"
         log.debug("Input Data: {}", inputData)
         try {
             Files.write(Paths.get(filePath), inputData.toByteArray(), StandardOpenOption.APPEND)
         } catch (e: IOException) {
             log.error("File Write Error!!")
-            return null
+            throw IOException("File Write Error!!")
         }
         return inputData
     }
 
     @CacheEvict(cacheNames = ["file"], key = "#key")
-    override fun update(key: String, value: String): String? {
+    override fun update(key: String, value: String): String {
         if (!delete(key)) {
             throw IOException("Something was wrong, when key update")
         }

@@ -14,7 +14,6 @@ import java.time.Instant
     classes = [WebfluxApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
 class WebfluxApplicationTests {
-
     val log: Logger = LoggerFactory.getLogger(javaClass)
 
     @Autowired
@@ -31,8 +30,9 @@ class WebfluxApplicationTests {
     @Test
     fun callGetMethodByTEST_thenReturnNull() {
         val input = "TEST"
-        val result = dataController.get(input)
-        Assertions.assertNull(result.block())
+        Assertions.assertThrowsExactly(IllegalArgumentException::class.java) {
+            log.debug(dataController.get(input).block().toString())
+        }
     }
 
     @Test
@@ -48,11 +48,21 @@ class WebfluxApplicationTests {
     @Test
     fun callCreateMethodByHello_thenThrowException() {
         val key = "hello"
-        val value = "test input"
+        val value = "test_input"
         val input = hashMapOf(key to value)
         Assertions.assertThrowsExactly(DuplicateKeyException::class.java) {
             log.debug(dataController.create(input).block().toString())
         }
+    }
+
+    @Test
+    fun callUpdateMethodByUpdate_thenReturnWorldCurrentTimestamp() {
+        val key = "update"
+        val value = "pass" + Instant.now().epochSecond.toString()
+        val input = hashMapOf(key to value)
+        val result = dataController.update(input)
+        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.block())
+        Assertions.assertEquals(value, dataController.get(key).block())
     }
 
     // TODO: Cache Flush 여부 검증 가능하도록 수정

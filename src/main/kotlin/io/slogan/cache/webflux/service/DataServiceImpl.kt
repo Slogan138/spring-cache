@@ -1,81 +1,55 @@
 package io.slogan.cache.webflux.service
 
-import org.apache.logging.log4j.util.Strings
+import io.slogan.cache.webflux.dao.DataAccess
+import io.slogan.cache.webflux.exception.DuplicateKeyException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import java.io.File
 import java.io.IOException
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
 
 @Service
-class DataServiceImpl : DataService {
+class DataServiceImpl(
+    val dataAccess: DataAccess
+) : DataService {
     val log: Logger = LoggerFactory.getLogger(javaClass)
-
-    @Value("#{environment['data.store.path']}")
-    lateinit var filePath: String
 
     @Cacheable(cacheNames = ["file"], key = "#key")
     override fun get(key: String): String {
-        log.info("Found Key: {}", key)
-        val searchValue = arrayListOf<String>()
-        File(filePath).forEachLine { line ->
-            log.debug("Read Line: {}", line)
-            if (line.contains(key)) {
-                searchValue.add(line)
-            }
-        }
-
-        if (searchValue.size != 1) {
+        val findValue = dataAccess.findKey(key)
+        if (findValue.size != 1) {
             log.warn("Illegal Input: {}", key)
             throw IllegalArgumentException("Illegal Input!!")
         }
-
-        log.debug("Found Value: {}", searchValue[0].split(":")[1])
-        return searchValue[0].split(":")[1]
+        return findValue[0].split(':')[1]
     }
 
     @CacheEvict(cacheNames = ["file"], key = "#key")
     override fun create(key: String, value: String): String {
-        get(key) // Check duplicate key
-        val inputData = "$key:$value\n"
-        log.debug("Input Data: {}", inputData)
-        try {
-            Files.write(Paths.get(filePath), inputData.toByteArray(), StandardOpenOption.APPEND)
-        } catch (e: IOException) {
-            log.error("File Write Error!!")
-            throw IOException("File Write Error!!")
+        if (dataAccess.findKey(key).isNotEmpty()) {
+            throw DuplicateKeyException("Duplicate Key detected!!")
         }
-        return inputData
+
+        return dataAccess.insertData(key, value)
     }
 
     @CacheEvict(cacheNames = ["file"], key = "#key")
     override fun update(key: String, value: String): String {
-        if (!delete(key)) {
+        if (dataAccess.findKey(key).size != 1) {
+            throw IllegalArgumentException("Illegal Input!!")
+        }
+
+        if (!dataAccess.deleteData(key)) {
             throw IOException("Something was wrong, when key update")
         }
-        return create(key, value)
+
+        return dataAccess.insertData(key, value)
     }
 
     @CacheEvict(cacheNames = ["file"], key = "#key")
     override fun delete(key: String): Boolean {
-        val data = arrayListOf<String>()
-        val file = File(filePath)
-        file.forEachLine {
-            if (key != it.split(":")[0]) {
-                data.add(it)
-            }
-        }
-
-        // Warning!! : Performance Issue must cause, If File has huge data.
-        file.delete()
-        Files.write(Paths.get(filePath), Strings.join(data, '\n').toByteArray(), StandardOpenOption.CREATE)
-        return true
+        return dataAccess.deleteData(key)
     }
 
     @CacheEvict(cacheNames = ["file"], key = "#key")

@@ -41,7 +41,7 @@ class WebfluxApplicationTests {
         val value = "pass"
         val input = hashMapOf(key to value)
         val result = dataController.create(input)
-        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.block())
+        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.blockFirst())
         Assertions.assertEquals(value, dataController.get(key).block())
     }
 
@@ -51,7 +51,7 @@ class WebfluxApplicationTests {
         val value = "test_input"
         val input = hashMapOf(key to value)
         Assertions.assertThrowsExactly(DuplicateKeyException::class.java) {
-            log.debug(dataController.create(input).block().toString())
+            log.debug(dataController.create(input).blockFirst().toString())
         }
     }
 
@@ -61,7 +61,7 @@ class WebfluxApplicationTests {
         val value = "pass" + Instant.now().epochSecond.toString()
         val input = hashMapOf(key to value)
         val result = dataController.update(input)
-        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.block())
+        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.blockFirst())
         Assertions.assertEquals(value, dataController.get(key).block())
     }
 

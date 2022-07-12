@@ -24,14 +24,14 @@ class WebfluxApplicationTests {
         val input = "hello"
         val result = dataController.get(input)
         log.debug("Data: {}", result)
-        Assertions.assertEquals("world", result.block())
+        Assertions.assertEquals("world", result.body?.block())
     }
 
     @Test
     fun callGetMethodByTEST_thenReturnNull() {
         val input = "TEST"
         Assertions.assertThrowsExactly(IllegalArgumentException::class.java) {
-            log.debug(dataController.get(input).block().toString())
+            log.debug(dataController.get(input).body?.block().toString())
         }
     }
 
@@ -41,8 +41,8 @@ class WebfluxApplicationTests {
         val value = "pass"
         val input = hashMapOf(key to value)
         val result = dataController.create(input)
-        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.blockFirst())
-        Assertions.assertEquals(value, dataController.get(key).block())
+        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.body?.blockFirst())
+        Assertions.assertEquals(value, dataController.get(key).body?.block())
     }
 
     @Test
@@ -51,7 +51,7 @@ class WebfluxApplicationTests {
         val value = "test_input"
         val input = hashMapOf(key to value)
         Assertions.assertThrowsExactly(DuplicateKeyException::class.java) {
-            log.debug(dataController.create(input).blockFirst().toString())
+            log.debug(dataController.create(input).body?.blockFirst().toString())
         }
     }
 
@@ -61,13 +61,13 @@ class WebfluxApplicationTests {
         val value = "pass" + Instant.now().epochSecond.toString()
         val input = hashMapOf(key to value)
         val result = dataController.update(input)
-        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.blockFirst())
-        Assertions.assertEquals(value, dataController.get(key).block())
+        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.body?.blockFirst())
+        Assertions.assertEquals(value, dataController.get(key).body?.block())
     }
 
     // TODO: Cache Flush 여부 검증 가능하도록 수정
     @Test
     fun callFlushCacheMethod_thenReturnTrue() {
-        Assertions.assertTrue { dataController.deleteCache("hello").blockOptional().get() }
+        Assertions.assertTrue { dataController.deleteCache("hello").body!!.blockOptional().get() }
     }
 }

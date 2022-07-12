@@ -22,7 +22,7 @@ class DataAccess {
         val searchValue = arrayListOf<String>()
         File(filePath).forEachLine { line ->
             log.debug("Read Line: {}", line)
-            if (line.contains(key)) {
+            if (line.split(":")[0] == key) {
                 searchValue.add(line)
             }
         }

@@ -8,6 +8,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.MediaType
+import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.Instant
 
 @SpringBootTest(
@@ -18,6 +20,9 @@ class WebfluxApplicationTests {
 
     @Autowired
     lateinit var dataController: DataController
+
+    @Autowired
+    lateinit var webTestClient: WebTestClient
 
     @Test
     fun callGetMethodByHello_thenReturnWorld() {
@@ -33,6 +38,15 @@ class WebfluxApplicationTests {
         Assertions.assertThrowsExactly(IllegalArgumentException::class.java) {
             log.debug(dataController.get(input).body?.block().toString())
         }
+    }
+
+    @Test
+    fun callGetURLByTest_thenReturnErrorResponse() {
+        val input = "TEST"
+        webTestClient.get().uri("/api/data").attribute("key", input).accept(MediaType.APPLICATION_JSON).exchange()
+            .expectStatus().isBadRequest.expectBody(
+                HashMap::class.java
+            )
     }
 
     @Test
@@ -63,6 +77,15 @@ class WebfluxApplicationTests {
         val result = dataController.update(input)
         Assertions.assertEquals(arrayListOf("$key:$value\n"), result.body?.blockFirst())
         Assertions.assertEquals(value, dataController.get(key).body?.block())
+    }
+
+    @Test
+    fun callDeleteMethodByDeleteTest_thenReturnTrue() {
+        val key = "delete_test"
+        val value = Instant.now().epochSecond.toString()
+        dataController.create(hashMapOf(key to value))
+        log.debug("Data was input: {}", dataController.get(key).body?.block())
+        Assertions.assertTrue { dataController.delete(key).body!!.blockOptional().get() }
     }
 
     // TODO: Cache Flush 여부 검증 가능하도록 수정

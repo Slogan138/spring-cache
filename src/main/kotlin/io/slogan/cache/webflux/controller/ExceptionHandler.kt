@@ -17,7 +17,7 @@ class ExceptionHandler {
 
     @ExceptionHandler(value = [IOException::class])
     fun ioExceptionHandler(exception: IOException): ResponseEntity<Mono<Map<String, Any>>> {
-        return ResponseEntity.badRequest()
+        return ResponseEntity.internalServerError()
             .body(Mono.justOrEmpty(hashMapOf<String, Any>("message" to "Internal Server Error", "code" to 500)))
     }
 }

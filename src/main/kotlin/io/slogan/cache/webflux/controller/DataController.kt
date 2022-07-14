@@ -41,6 +41,6 @@ class DataController(
         ResponseEntity.ok(Mono.justOrEmpty(dataService.delete(key)))
 
     @DeleteMapping("/api/data/flush/{key}")
-    fun deleteCache(@PathVariable key: String): ResponseEntity<Mono<Boolean>> =
+    fun flushCache(@PathVariable key: String): ResponseEntity<Mono<Boolean>> =
         ResponseEntity.ok(Mono.justOrEmpty(dataService.flushCache(key)))
 }

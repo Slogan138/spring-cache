@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
-import java.io.IOException
 
 @Service
 class DataServiceImpl(
@@ -38,10 +37,8 @@ class DataServiceImpl(
     override fun update(key: String, value: String): String {
         if (dataAccess.findKey(key).size != 1) {
             throw IllegalArgumentException("Illegal Input!!")
-        }
-
-        if (!dataAccess.deleteData(key)) {
-            throw IOException("Something was wrong, when key update")
+        } else {
+            dataAccess.deleteData(key)
         }
 
         return dataAccess.insertData(key, value)

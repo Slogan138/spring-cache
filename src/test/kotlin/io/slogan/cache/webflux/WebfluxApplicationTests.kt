@@ -1,6 +1,7 @@
 package io.slogan.cache.webflux
 
 import io.slogan.cache.webflux.controller.DataController
+import io.slogan.cache.webflux.dao.DataAccess
 import io.slogan.cache.webflux.exception.DuplicateKeyException
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -20,6 +21,9 @@ class WebfluxApplicationTests {
 
     @Autowired
     lateinit var dataController: DataController
+
+    @Autowired
+    lateinit var dataAccess: DataAccess
 
     @Autowired
     lateinit var webTestClient: WebTestClient
@@ -50,8 +54,22 @@ class WebfluxApplicationTests {
     }
 
     @Test
+    fun callGetMethodByHello_thenReturnCacheValue() {
+        // Before Test
+        val key = "cached_" + Instant.now().epochSecond.toString()
+        val value = "create_pass"
+        dataController.create(hashMapOf(key to value))
+
+        val getValue = dataController.get(key)
+        dataAccess.deleteData(key)
+        dataAccess.insertData(key, "update_pass")
+
+        Assertions.assertEquals(value, getValue.body?.block())
+    }
+
+    @Test
     fun callCreateMethod_thenReturnSendData() {
-        val key = "create_test" + Instant.now().epochSecond.toString()
+        val key = "create_test_" + Instant.now().epochSecond.toString()
         val value = "pass"
         val input = hashMapOf(key to value)
         val result = dataController.create(input)
@@ -60,12 +78,12 @@ class WebfluxApplicationTests {
     }
 
     @Test
-    fun callCreateMethodByHello_thenThrowException() {
+    fun callCreateMethodByHello_thenThrowDuplicateKeyException() {
         val key = "hello"
         val value = "test_input"
         val input = hashMapOf(key to value)
         Assertions.assertThrowsExactly(DuplicateKeyException::class.java) {
-            log.debug(dataController.create(input).body?.blockFirst().toString())
+            dataController.create(input).body?.blockFirst().toString()
         }
     }
 
@@ -80,6 +98,15 @@ class WebfluxApplicationTests {
     }
 
     @Test
+    fun callUpdateMethodByDuplicateKey_theThrowIllegalArgumentException() {
+        val key = "duplicate"
+        val value = Instant.now().epochSecond.toString()
+        Assertions.assertThrowsExactly(IllegalArgumentException::class.java) {
+            dataController.update(hashMapOf(key to value))
+        }
+    }
+
+    @Test
     fun callDeleteMethodByDeleteTest_thenReturnTrue() {
         val key = "delete_test"
         val value = Instant.now().epochSecond.toString()
@@ -88,9 +115,24 @@ class WebfluxApplicationTests {
         Assertions.assertTrue { dataController.delete(key).body!!.blockOptional().get() }
     }
 
-    // TODO: Cache Flush 여부 검증 가능하도록 수정
     @Test
     fun callFlushCacheMethod_thenReturnTrue() {
-        Assertions.assertTrue { dataController.deleteCache("hello").body!!.blockOptional().get() }
+        // Before Test
+        val key = "flush_" + Instant.now().epochSecond.toString()
+        val value = "create_pass"
+        dataController.create(hashMapOf(key to value))
+
+        val updatedValue = "update_pass"
+        dataAccess.deleteData(key)
+        dataAccess.insertData(key, updatedValue)
+        var getValue = dataController.get(key)
+
+        log.debug("value: {}, getValue: {}", value, getValue.body?.block())
+        Assertions.assertNotEquals(value, getValue.body?.block())
+
+        Assertions.assertTrue { dataController.flushCache("hello").body!!.blockOptional().get() }
+
+        getValue = dataController.get(key)
+        Assertions.assertEquals(updatedValue, getValue.body?.block())
     }
 }

@@ -10,14 +10,17 @@ import java.io.IOException
 class ExceptionHandler {
 
     @ExceptionHandler(value = [IllegalArgumentException::class])
-    fun illegalExceptionHandler(exception: IllegalArgumentException): ResponseEntity<Mono<Map<String, Any>>> {
-        return ResponseEntity.badRequest()
-            .body(Mono.justOrEmpty(hashMapOf<String, Any>("message" to "Illegal Input", "code" to 400)))
+    fun illegalExceptionHandler(exception: IllegalArgumentException): Mono<ResponseEntity<Map<String, Any>>> {
+        return Mono.justOrEmpty(
+            ResponseEntity.badRequest().body(hashMapOf<String, Any>("message" to "Illegal Input", "code" to 400))
+        )
     }
 
     @ExceptionHandler(value = [IOException::class])
-    fun ioExceptionHandler(exception: IOException): ResponseEntity<Mono<Map<String, Any>>> {
-        return ResponseEntity.internalServerError()
-            .body(Mono.justOrEmpty(hashMapOf<String, Any>("message" to "Internal Server Error", "code" to 500)))
+    fun ioExceptionHandler(exception: IOException): Mono<ResponseEntity<Map<String, Any>>> {
+        return Mono.justOrEmpty(
+            ResponseEntity.internalServerError()
+                .body(hashMapOf<String, Any>("message" to "Internal Server Error", "code" to 500))
+        )
     }
 }

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.Instant
 
@@ -33,14 +34,14 @@ class WebfluxApplicationTests {
         val input = "hello"
         val result = dataController.get(input)
         log.debug("Data: {}", result)
-        Assertions.assertEquals("world", result.body?.block())
+        Assertions.assertEquals("world", result.block()!!.body)
     }
 
     @Test
     fun callGetMethodByTEST_thenReturnNull() {
         val input = "TEST"
         Assertions.assertThrowsExactly(IllegalArgumentException::class.java) {
-            log.debug(dataController.get(input).body?.block().toString())
+            log.debug(dataController.get(input).block()!!.body.toString())
         }
     }
 
@@ -64,7 +65,7 @@ class WebfluxApplicationTests {
         dataAccess.deleteData(key)
         dataAccess.insertData(key, "update_pass")
 
-        Assertions.assertEquals(value, getValue.body?.block())
+        Assertions.assertEquals(value, getValue.block()!!.body)
     }
 
     @Test
@@ -73,8 +74,8 @@ class WebfluxApplicationTests {
         val value = "pass"
         val input = hashMapOf(key to value)
         val result = dataController.create(input)
-        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.body?.blockFirst())
-        Assertions.assertEquals(value, dataController.get(key).body?.block())
+        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.blockFirst()!!.body)
+        Assertions.assertEquals(value, dataController.get(key).block()!!.body)
     }
 
     @Test
@@ -83,7 +84,7 @@ class WebfluxApplicationTests {
         val value = "test_input"
         val input = hashMapOf(key to value)
         Assertions.assertThrowsExactly(DuplicateKeyException::class.java) {
-            dataController.create(input).body?.blockFirst().toString()
+            dataController.create(input).blockFirst()!!.body.toString()
         }
     }
 
@@ -93,8 +94,8 @@ class WebfluxApplicationTests {
         val value = "pass" + Instant.now().epochSecond.toString()
         val input = hashMapOf(key to value)
         val result = dataController.update(input)
-        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.body?.blockFirst())
-        Assertions.assertEquals(value, dataController.get(key).body?.block())
+        Assertions.assertEquals(arrayListOf("$key:$value\n"), result.blockFirst()!!.body)
+        Assertions.assertEquals(value, dataController.get(key).block()!!.body)
     }
 
     @Test
@@ -111,8 +112,8 @@ class WebfluxApplicationTests {
         val key = "delete_test"
         val value = Instant.now().epochSecond.toString()
         dataController.create(hashMapOf(key to value))
-        log.debug("Data was input: {}", dataController.get(key).body?.block())
-        Assertions.assertTrue { dataController.delete(key).body!!.blockOptional().get() }
+        log.debug("Data was input: {}", dataController.get(key).block()!!.body)
+        Assertions.assertEquals(ResponseEntity.ok(true), dataController.delete(key).blockOptional().get())
     }
 
     @Test
@@ -127,12 +128,12 @@ class WebfluxApplicationTests {
         dataAccess.insertData(key, updatedValue)
         var getValue = dataController.get(key)
 
-        log.debug("value: {}, getValue: {}", value, getValue.body?.block())
-        Assertions.assertNotEquals(value, getValue.body?.block())
+        log.debug("value: {}, getValue: {}", value, getValue.block()!!.body)
+        Assertions.assertNotEquals(value, getValue.block()!!.body)
 
-        Assertions.assertTrue { dataController.flushCache("hello").body!!.blockOptional().get() }
+        Assertions.assertEquals(ResponseEntity.ok(true), dataController.flushCache("hello").blockOptional().get())
 
         getValue = dataController.get(key)
-        Assertions.assertEquals(updatedValue, getValue.body?.block())
+        Assertions.assertEquals(updatedValue, getValue.block()!!.body)
     }
 }

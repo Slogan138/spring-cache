@@ -19,7 +19,7 @@ internal class GetTests(
     init {
         this.describe("Get Value By `hello` then Return `world`") {
             val input = "hello"
-            dataController.get(input).body?.block() shouldBe "world"
+            dataController.get(input).block()?.body shouldBe "world"
         }
     }
 }

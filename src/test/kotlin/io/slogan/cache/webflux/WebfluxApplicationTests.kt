@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.test.web.reactive.server.WebTestClient
 import java.time.Instant
 
+@Suppress("ReactiveStreamsUnusedPublisher")
 @SpringBootTest(
     classes = [WebfluxApplication::class], webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT
 )
